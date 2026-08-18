@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ocean Pets Collection</title>
+<style>
+body{margin:0;background:linear-gradient(#004f72,#001526);color:white;font-family:Arial;padding:20px}
+h1{text-align:center;font-size:34px}
+#pearls{text-align:center;background:#ffffff12;padding:12px;border-radius:15px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:700px;margin:auto}
+.pet{background:#062b42dd;border:1px solid #ffffff22;border-radius:20px;padding:20px;text-align:center;box-shadow:0 10px 30px #0007}
+.pet .animal{font-size:55px}
+button{border:0;border-radius:14px;padding:12px;background:#ff7000;color:white;font-weight:bold}
+</style>
+</head>
+<body>
+<h1>SEA PET COLLECTION</h1>
+<div id="pearls"></div>
+<br>
+<div class="grid" id="pets"></div>
+
+<script>
+const KEY="OCEAN_PETS_SAVE";
+let s=JSON.parse(localStorage.getItem(KEY))||{pearls:100,level:1,unlocked:["Turtle"],pets:{},aquariums:[{pets:[]}]};
+
+const pets=[
+ ["Turtle",1,10],
+ ["Clownfish",2,15],
+ ["Seahorse",3,25],
+ ["Jellyfish",4,35],
+ ["Dolphin",6,50],
+ ["Octopus",8,70],
+ ["Shark",11,100],
+ ["Whale",15,150]
+];
+
+function save(){localStorage.setItem(KEY,JSON.stringify(s))}
+
+function draw(){
+ document.getElementById("pearls").textContent="💎 Pearls: "+s.pearls+" · Level "+s.level;
+
+ document.getElementById("pets").innerHTML=pets.map(p=>{
+  let own=s.unlocked.includes(p[0]);
+  return `<div class="pet">
+   <div class="animal">${p[0]=="Turtle"?"🐢":p[0]=="Clownfish"?"🐠":p[0]=="Dolphin"?"🐬":p[0]=="Shark"?"🦈":p[0]=="Whale"?"🐋":p[0]=="Octopus"?"🐙":"🫧"}</div>
+   <h2>${p[0]}</h2>
+   <p>${own?"UNLOCKED":"Unlock at level "+p[1]}</p>
+   ${!own&&s.level>=p[1]?`<button onclick="buy('${p[0]}',${p[2]})">BUY · ${p[2]}</button>`:""}
+  </div>`;
+ }).join("");
+}
+function buy(name,cost){
+ if(s.pearls<cost)return alert("Not enough pearls!");
+ s.pearls-=cost;
+ s.unlocked.push(name);
+ let id=name.toLowerCase()+Date.now();
+ s.pets[id]={type:name,name:name,hunger:100,happiness:100,energy:100};
+ s.aquariums[0].pets.push(id);
+ save();draw();
+}
+draw();
+</script>
+</body>
+</html>
