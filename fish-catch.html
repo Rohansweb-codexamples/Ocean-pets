@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fish Catch</title>
+<style>
+body{margin:0;overflow:hidden;background:#003d60;color:white;font-family:Arial;text-align:center}
+#score{font-size:25px;padding:15px}
+.fish{position:absolute;font-size:45px;user-select:none}
+</style>
+</head>
+<body>
+<div id="score">CATCH 10 FISH · 0 / 10</div>
+
+<script>
+const KEY="OCEAN_PETS_SAVE";
+let s=JSON.parse(localStorage.getItem(KEY))||{pearls:0};
+let score=0;
+
+function fish(){
+ if(score>=10)return;
+ let f=document.createElement("div");
+ f.className="fish";
+ f.textContent=["🐠","🐟","🐡"][Math.floor(Math.random()*3)];
+ f.style.left="-60px";
+ f.style.top=(15+Math.random()*70)+"vh";
+ f.onclick=()=>{
+  score++;
+  f.remove();
+  document.getElementById("score").textContent="CATCH 10 FISH · "+score+" / 10";
+  if(score>=10){
+   s.pearls+=35;
+   localStorage.setItem(KEY,JSON.stringify(s));
+   document.getElementById("score").textContent="WIN! +35 PEARLS";
+  }else fish();
+ };
+ document.body.appendChild(f);
+
+ let x=-60;
+ let move=setInterval(()=>{
+  x+=3;
+  f.style.left=x+"px";
+  if(x>innerWidth+50){
+   clearInterval(move);
+   f.remove();
+   if(score<10)fish();
+  }
+ },30);
+}
+
+for(let i=0;i<3;i++)fish();
+</script>
+</body>
+</html>
