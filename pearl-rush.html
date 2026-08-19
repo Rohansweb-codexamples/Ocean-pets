@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pearl Rush</title>
+<style>
+body{margin:0;overflow:hidden;background:#00294b;color:white;font-family:Arial;text-align:center}
+#score{font-size:25px;padding:15px}
+.pearl{position:absolute;font-size:45px;cursor:pointer;user-select:none}
+</style>
+</head>
+<body>
+<div id="score">TIME: 20 · PEARLS: 0</div>
+
+<script>
+const KEY="OCEAN_PETS_SAVE";
+let s=JSON.parse(localStorage.getItem(KEY))||{pearls:0};
+let score=0,time=20;
+
+function spawn(){
+ let p=document.createElement("div");
+ p.className="pearl";
+ p.textContent="💎";
+ p.style.left=Math.random()*85+"vw";
+ p.style.top=(70+Math.random()*20)+"vh";
+ p.onclick=()=>{
+  score++;
+  p.remove();
+  spawn();
+ };
+ document.body.appendChild(p);
+}
+
+for(let i=0;i<6;i++)spawn();
+
+let timer=setInterval(()=>{
+ time--;
+ document.getElementById("score").textContent="TIME: "+time+" · PEARLS: "+score;
+ if(time<=0){
+  clearInterval(timer);
+  document.querySelectorAll(".pearl").forEach(x=>x.remove());
+  s.pearls+=score*2;
+  localStorage.setItem(KEY,JSON.stringify(s));
+  document.getElementById("score").textContent="FINISHED! +"+score*2+" PEARLS";
+ }
+},1000);
+</script>
+</body>
+</html>
