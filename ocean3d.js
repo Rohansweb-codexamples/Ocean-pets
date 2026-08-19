@@ -1,0 +1,30 @@
+import * as THREE from 'https://esm.sh/three@0.179.1';
+
+const colors={Turtle:0x43c95c,Clownfish:0xff7a00,Seahorse:0xffbf3c,Jellyfish:0xc58cff,Dolphin:0x39bdf2,Octopus:0xb456ff,Shark:0x8fa5b8,Whale:0x3178d8,Stingray:0x746bff,Angelfish:0xff59ca};
+const mat=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.34,metalness:.06,...extra});
+const part=(geo,color,scale=[1,1,1],pos=[0,0,0],rot=[0,0,0])=>{const m=new THREE.Mesh(geo,mat(color));m.scale.set(...scale);m.position.set(...pos);m.rotation.set(...rot);return m};
+
+export function mountAquarium(el,state,aquarium){
+  if(!el||el.dataset.threeMounted)return;el.dataset.threeMounted='true';
+  const scene=new THREE.Scene();scene.fog=new THREE.Fog(0x043957,7,24);
+  const camera=new THREE.PerspectiveCamera(45,1,.1,60);camera.position.set(0,4.4,12);
+  const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setClearColor(0,0);renderer.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none';el.prepend(renderer.domElement);
+  scene.add(new THREE.HemisphereLight(0xbff8ff,0x063828,2.6));const sun=new THREE.DirectionalLight(0xffffff,2.1);sun.position.set(-5,8,7);scene.add(sun);
+  const group=new THREE.Group();scene.add(group);const sand=part(new THREE.CylinderGeometry(8.8,9.8,.45,64),0xd5a35f,[1,.5,.42],[0,-3.1,0]);group.add(sand);
+  (aquarium.decorations||[]).forEach((d,i)=>{const geo=d.includes('Rock')?new THREE.DodecahedronGeometry(.45+Math.random()*.25):new THREE.ConeGeometry(.25,.9+Math.random()*.8,8);const m=part(geo,[0xff6b8a,0xffcc66,0x65e68a,0x7dd3fc,0xb084ff][i%5],[1,1,1],[-6+(i*1.45)%12,-2.65,-1.5-Math.random()*2],[Math.random(),Math.random(),Math.random()]);group.add(m)});
+  for(let i=0;i<24;i++)group.add(part(new THREE.CapsuleGeometry(.035,.9+Math.random()*1.4,4,8),i%3?0x26d07c:0x14a6a1,[1,1,1],[-7+Math.random()*14,-2.55,-3+Math.random()*3.5],[0,0,-.35+Math.random()*.7]));
+  const pets=(state.pets||[]).map((p,i)=>makeAnimal(p,i));pets.forEach(o=>group.add(o));
+  const bubbles=Array.from({length:42},()=>makeBubble());bubbles.forEach(b=>group.add(b));
+  function body(root,geo,c,scale,pos,rot){root.add(part(geo,c,scale,pos,rot));}
+  function makeAnimal(p,i){const root=new THREE.Group(),c=colors[p.type]||0x20d6ff,dark=0x062238,white=0xf3ffff;root.userData={speed:.55+Math.random()*.55,phase:Math.random()*6};
+    if(p.type==='Turtle'){body(root,new THREE.SphereGeometry(.62,32,20),0x25784c,[1.45,.42,1.05],[0,0,0]);body(root,new THREE.SphereGeometry(.25,20,12),c,[.9,.7,.7],[.92,.04,0]);for(const z of[-.55,.55]){body(root,new THREE.SphereGeometry(.22,16,10),c,[1.25,.18,.48],[-.12,-.08,z]);}}
+    else if(p.type==='Jellyfish'){body(root,new THREE.SphereGeometry(.55,32,16),c,[1.2,.62,1.2],[0,.18,0]);for(let k=0;k<8;k++)body(root,new THREE.CapsuleGeometry(.025,.9,4,8),c,[1,1,1],[-.45+k*.13,-.58,Math.sin(k)*.32],[0,0,Math.sin(k)*.25]);}
+    else if(p.type==='Octopus'){body(root,new THREE.SphereGeometry(.5,32,20),c,[1.1,1.05,1.1],[0,.16,0]);for(let k=0;k<8;k++)body(root,new THREE.CapsuleGeometry(.055,.75,5,8),c,[1,1,1],[Math.cos(k)*.35,-.5,Math.sin(k)*.35],[.7,0,k]);}
+    else if(p.type==='Stingray'){body(root,new THREE.CircleGeometry(.9,48),c,[1.55,.75,1],[0,0,0],[-Math.PI/2,0,0]);body(root,new THREE.ConeGeometry(.08,1.2,8),c,[1,1,1],[-.95,0,0],[0,0,Math.PI/2]);}
+    else if(p.type==='Seahorse'){for(let k=0;k<5;k++)body(root,new THREE.SphereGeometry(.2,20,12),c,[1.1-k*.08,1,1],[.18*Math.sin(k),.42-k*.2,0]);body(root,new THREE.ConeGeometry(.12,.55,16),c,[1,1,1],[.32,.38,0],[0,0,-Math.PI/2]);body(root,new THREE.TorusGeometry(.22,.035,8,24),c,[1,1,1],[-.08,-.62,0],[0,Math.PI/2,0]);}
+    else {const long=p.type==='Whale'?2.45:p.type==='Shark'?1.95:p.type==='Dolphin'?1.75:p.type==='Angelfish'?1.05:1.45;body(root,new THREE.SphereGeometry(.5,32,20),c,[long,.62,.52],[0,0,0]);body(root,new THREE.ConeGeometry(.28,.65,3),c,[1,1,1],[-long*.48,0,0],[0,0,Math.PI/2]);body(root,new THREE.ConeGeometry(.18,.55,3),c,[1,1,1],[.05,.45,0],[0,0,0]);if(p.type==='Clownfish'){for(const x of[-.25,.25])body(root,new THREE.BoxGeometry(.06,.72,.62),white,[1,1,1],[x,0,.01]);}if(p.type==='Shark')body(root,new THREE.ConeGeometry(.22,.7,3),0xdbe9f2,[1,1,1],[.82,.02,0],[0,0,-Math.PI/2]);if(p.type==='Angelfish')body(root,new THREE.ConeGeometry(.36,.9,3),0xffd166,[1,1,1],[0,.36,0],[0,0,Math.PI]);}
+    body(root,new THREE.SphereGeometry(.055,12,8),dark,[1,1,1],[.55,.12,.34]);root.position.set(-5+((p.x||20)/100)*10,-1.45+((p.y||40)/100)*4,-1-i*.13);return root;}
+  function makeBubble(){const b=new THREE.Mesh(new THREE.SphereGeometry(.035+Math.random()*.08,12,8),new THREE.MeshPhysicalMaterial({color:0xdffbff,transparent:true,opacity:.45,roughness:0,transmission:.4}));b.position.set(-7+Math.random()*14,-3+Math.random()*6,-3+Math.random()*4);b.userData.v=.008+Math.random()*.018;return b}
+  function resize(){const r=el.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}resize();addEventListener('resize',resize,{passive:true});let t=0;
+  renderer.setAnimationLoop(()=>{t+=.016;group.rotation.y=Math.sin(t*.22)*.08;pets.forEach((root,i)=>{root.position.x+=Math.sin(t*root.userData.speed+root.userData.phase)*.006;root.position.y+=Math.cos(t*.9+root.userData.phase)*.004;root.rotation.y=Math.sin(t*.7+i)*.22});bubbles.forEach(b=>{b.position.y+=b.userData.v;if(b.position.y>3.4){b.position.y=-3;b.position.x=-7+Math.random()*14}});renderer.render(scene,camera)});
+}
