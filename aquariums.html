@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Aquariums</title>
+<style>
+body{margin:0;padding:20px;background:linear-gradient(135deg,#003e5e,#001326);color:white;font-family:Arial}
+h1{text-align:center}
+.aq{padding:20px;margin:12px auto;max-width:600px;background:#ffffff0d;border:1px solid #ffffff20;border-radius:20px}
+button{padding:13px 18px;border:0;border-radius:14px;background:#ff7000;color:white;font-weight:bold;margin:4px}
+.create{display:block;margin:20px auto;background:#00aeca}
+</style>
+</head>
+<body>
+<h1>AQUARIUMS</h1>
+<div id="list"></div>
+<button class="create" onclick="create()">CREATE NEW AQUARIUM</button>
+
+<script>
+const KEY="OCEAN_PETS_SAVE";
+let s=JSON.parse(localStorage.getItem(KEY))||{
+ pearls:100,level:1,activeAquarium:0,
+ aquariums:[{name:"My First Aquarium",theme:"reef",pets:[]}],
+ pets:{}
+};
+
+function save(){localStorage.setItem(KEY,JSON.stringify(s))}
+
+function draw(){
+ document.getElementById("list").innerHTML=s.aquariums.map((a,i)=>`
+ <div class="aq">
+  <h2>${a.name}</h2>
+  <p>Pets: ${a.pets.length}</p>
+  <button onclick="enter(${i})">MAKE ACTIVE</button>
+  <button onclick="rename(${i})">RENAME</button>
+ </div>`).join("");
+}
+
+function create(){
+ let name=prompt("Aquarium name:");
+ if(!name)return;
+ s.aquariums.push({
+  name:name,
+  theme:["reef","lagoon","deep","garden","rainbow"][s.aquariums.length%5],
+  pets:[],
+  decorations:[]
+ });
+ s.activeAquarium=s.aquariums.length-1;
+ save();draw();
+}
+
+function enter(i){
+ s.activeAquarium=i;
+ save();
+ alert("Active aquarium: "+s.aquariums[i].name);
+}
+
+function rename(i){
+ let n=prompt("New name:",s.aquariums[i].name);
+ if(n){s.aquariums[i].name=n;save();draw()}
+}
+
+draw();
+</script>
+</body>
+</html>
