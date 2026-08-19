@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bubble Pop</title>
+<style>
+body{margin:0;overflow:hidden;background:linear-gradient(#007c9e,#00172b);color:white;font-family:Arial;text-align:center}
+#score{font-size:25px;padding:15px}
+.b{position:absolute;border:3px solid #aafaff;border-radius:50%;background:#ffffff22}
+</style>
+</head>
+<body>
+<div id="score">BUBBLES: 0 / 20</div>
+
+<script>
+const KEY="OCEAN_PETS_SAVE";
+let s=JSON.parse(localStorage.getItem(KEY))||{pearls:0};
+let score=0;
+
+function bubble(){
+ if(score>=20)return;
+ let b=document.createElement("div");
+ b.className="b";
+ let z=30+Math.random()*55;
+ b.style.width=z+"px";
+ b.style.height=z+"px";
+ b.style.left=Math.random()*90+"vw";
+ b.style.top=Math.random()*80+"vh";
+ b.onclick=()=>{
+  score++;
+  b.remove();
+  document.getElementById("score").textContent="BUBBLES: "+score+" / 20";
+  if(score>=20){
+   s.pearls+=40;
+   localStorage.setItem(KEY,JSON.stringify(s));
+   document.getElementById("score").textContent="WIN! +40 PEARLS";
+  }else bubble();
+ };
+ document.body.appendChild(b);
+}
+
+for(let i=0;i<8;i++)bubble();
+</script>
+</body>
+</html>
