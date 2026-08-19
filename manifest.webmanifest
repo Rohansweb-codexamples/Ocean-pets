@@ -1,0 +1,9 @@
+{
+  "name": "Ocean Pets",
+  "short_name": "Ocean Pets",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#021326",
+  "theme_color": "#0689d8",
+  "description": "A mobile-first underwater pet game with Three.js aquariums and offline support."
+}
